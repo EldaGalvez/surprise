@@ -77,14 +77,14 @@
     transform: translateX(-50%) translateY(-30px);
   }
 
-  /* ---------- TEXTO (oculto al inicio) ---------- */
+  /* ---------- TEXTO (arriba, oculto al inicio) ---------- */
   .texto {
     position: fixed;
     left: 50%;
-    bottom: 3%;
+    top: 3%;
+    transform: translateX(-50%) translateY(-30px);
     z-index: 50;
     opacity: 0;
-    transform: translateX(-50%) translateY(30px);
     transition: opacity 1s ease, transform 1s ease;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     text-align: center;
@@ -418,18 +418,10 @@ function create(ctx, w, h) {
     return { grow, base, ctrl, tip };
   }
 
-  // Posición base (abajo, cuando NO hay texto)
-  // y posición elevada (cuando SÍ hay texto).
-  // La diferencia es exactamente el espacio que ocupa el texto.
-  const baseY = h * 0.82;          // posición original
-  const textoAltura = h * 0.22;    // cuánto sube el ramo por el texto
-  let groundY = baseY;
+  // El ramo se queda quieto SIEMPRE en h * 0.82.
+  const groundY = h * 0.82;
 
-  return (t, dt) => {
-    // Interpolación suave hacia el objetivo
-    const objetivo = state.ramoArriba ? baseY - textoAltura : baseY;
-    groundY += (objetivo - groundY) * Math.min(1, dt * 3);
-
+  return (t) => {
     const grad = ctx.createRadialGradient(cx, h * 0.45, 0, cx, h * 0.55, Math.max(w, h));
     grad.addColorStop(0, bg.mid);
     grad.addColorStop(0.5, bg.top);
@@ -534,10 +526,6 @@ function create(ctx, w, h) {
   };
 }
 
-const state = {
-  ramoArriba: false,
-};
-
 const lienzo = document.querySelector('canvas');
 const pincel = lienzo.getContext('2d');
 
@@ -580,12 +568,13 @@ function revealMessage() {
   btn.style.opacity = '0';
   setTimeout(() => { btn.style.display = 'none'; }, 500);
 
-  // Esto es lo que hace que el ramo suba: el texto "empuja" al ramo.
-  state.ramoArriba = true;
-
+  // El título se va
   document.getElementById('titulo').classList.add('oculto');
+
+  // El texto aparece arriba, en su lugar
   document.getElementById('texto').classList.add('mostrar-texto');
 
+  // Lluvia de pétalos
   if (!raining) {
     raining = true;
     for (let i = 0; i < 15; i++) {
