@@ -22,7 +22,6 @@
     z-index: 1;
   }
 
-  /* ---------- BOTÓN ---------- */
   .btn-regalo {
     position: fixed;
     left: 50%;
@@ -52,7 +51,6 @@
     transform: translateX(-50%) scale(0.97);
   }
 
-  /* ---------- TÍTULO ---------- */
   .titulo {
     position: fixed;
     left: 50%;
@@ -66,7 +64,7 @@
     pointer-events: none;
     padding: 0 20px;
     color: #ffe066;
-    font-size: clamp(1.2rem, 4vw, 1.8rem);
+    font-size: clamp(1.1rem, 4vw, 1.8rem);
     font-weight: 800;
     letter-spacing: 0.05em;
     text-shadow: 0 2px 12px rgba(0,0,0,0.6);
@@ -77,11 +75,10 @@
     transform: translateX(-50%) translateY(-30px);
   }
 
-  /* ---------- TEXTO ---------- */
   .texto {
     position: fixed;
     left: 50%;
-    bottom: 4%;
+    bottom: 3%;
     z-index: 50;
     opacity: 0;
     transform: translateX(-50%) translateY(30px);
@@ -89,13 +86,14 @@
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     text-align: center;
     pointer-events: none;
-    padding: 0 20px;
+    padding: 0 16px;
     color: #fff;
-    font-size: clamp(0.95rem, 3vw, 1.15rem);
+    font-size: clamp(0.85rem, 3.4vw, 1.15rem);
     font-weight: 500;
-    max-width: 520px;
-    line-height: 1.55;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9);
+    max-width: min(520px, 92vw);
+    line-height: 1.5;
+    /* Sombra FUERTE para que se lea sobre cualquier fondo */
+    text-shadow: 0 2px 14px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,1);
   }
 
   .texto.mostrar-texto {
@@ -103,21 +101,6 @@
     transform: translateX(-50%) translateY(0);
   }
 
-  /* ---------- AJUSTES PARA CELULAR (vertical) ---------- */
-  @media (max-aspect-ratio: 1/1) {
-    .texto {
-      font-size: clamp(0.85rem, 3.5vw, 1rem);
-      max-width: 88%;
-      bottom: 3%;
-      line-height: 1.45;
-      text-shadow: 0 2px 14px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9);
-    }
-    .titulo {
-      font-size: clamp(1rem, 4.5vw, 1.4rem);
-    }
-  }
-
-  /* ---------- LLUVIA DE PÉTALOS ---------- */
   .floating-petal {
     position: fixed;
     top: -30px;
@@ -145,7 +128,7 @@
 <p class="texto" id="texto">
   "Yo vi esta flor y pensé en ti porque es bonita, y bueno, en realidad a mí no me gusta, pero creí que te gustaría porque tú sí eres bonita."
   <br>
-  <span style="font-size: 0.85em; opacity: 0.85; font-style: italic;">Sí, es de Shrek💛</span>
+  <span style="font-size: 0.9em; opacity: 0.9; font-style: italic;">Sí, es de Shrek💛</span>
 </p>
 
 <button id="actionBtn" class="btn-regalo" onclick="revealMessage()">Toca aquí 💛</button>
@@ -336,9 +319,16 @@ const bg = {
 
 function create(ctx, w, h) {
   const cx = w / 2;
-  // Si la pantalla es vertical (celular), hacemos el ramo más pequeño
+
+  // ---------- CLAVE DEL ARREGLO ----------
+  // En lugar de calcular el tamaño del ramo con la altura completa,
+  // lo limitamos a un % de la ALTURA VISIBLE y al ancho disponible.
   const vertical = h > w;
-  const S = Math.min(w, h * (vertical ? 0.5 : 0.7));
+  // El ramo debe ocupar como máximo el 55% de la altura en celular,
+  // y como máximo el ancho de la pantalla (con margen).
+  const maxHeight = vertical ? h * 0.55 : h * 0.75;
+  const maxWidth = w * 0.9;
+  const S = Math.min(maxWidth, maxHeight);
 
   const paletaGrande = [
     { angle: 0,      dist: 0.00, len: 1.00, size: 0.095 },
@@ -430,6 +420,7 @@ function create(ctx, w, h) {
     return { grow, base, ctrl, tip };
   }
 
+  // Punto de unión inicial: abajo, como siempre
   let groundY = vertical ? h * 0.78 : h * 0.82;
 
   return (t, dt) => {
@@ -559,13 +550,13 @@ function preparar() {
   lienzo.height = Math.round(alto * escala);
   pincel.setTransform(escala, 0, 0, escala, 0, 0);
 
-  // En celular (vertical), subimos el ramo MUCHO más para dejar espacio al texto.
+  // Estado inicial: ramo abajo, listo para subir
   const vertical = alto > ancho;
   if (state.ramoArriba) {
-    // Cuando ya se pulsó el botón
-    state.target = vertical ? alto * 0.42 : alto * 0.68;
+    // Ya se pulsó: subimos el ramo a un tercio superior de la pantalla
+    state.target = vertical ? alto * 0.35 : alto * 0.65;
   } else {
-    // Al inicio
+    // Aún no se pulsa: ramo abajo
     state.target = vertical ? alto * 0.78 : alto * 0.82;
   }
 
@@ -599,8 +590,8 @@ function revealMessage() {
 
   const vertical = alto > ancho;
   state.ramoArriba = true;
-  // En celular el ramo sube MUCHO más arriba
-  state.target = vertical ? alto * 0.42 : alto * 0.68;
+  // Al pulsar, el ramo sube mucho más en celular
+  state.target = vertical ? alto * 0.35 : alto * 0.65;
 
   document.getElementById('titulo').classList.add('oculto');
   document.getElementById('texto').classList.add('mostrar-texto');
@@ -630,7 +621,7 @@ function createPetal() {
 
   setTimeout(() => {
     petal.remove();
-  }, duration * 1000);
+  }, 1000 * duration);
 }
 </script>
 
