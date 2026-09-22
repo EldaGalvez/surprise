@@ -53,8 +53,6 @@
   }
 
   /* ---------- TÍTULO ---------- */
-  /* Visible desde el principio arriba del ramo.
-     Al pulsar el botón se desvanece. */
   .titulo {
     position: fixed;
     left: 50%;
@@ -74,7 +72,6 @@
     text-shadow: 0 2px 12px rgba(0,0,0,0.6);
   }
 
-  /* Al pulsar, el título se desvanece hacia arriba */
   .titulo.oculto {
     opacity: 0;
     transform: translateX(-50%) translateY(-30px);
@@ -549,7 +546,8 @@ function preparar() {
   lienzo.width = Math.round(ancho * escala);
   lienzo.height = Math.round(alto * escala);
   pincel.setTransform(escala, 0, 0, escala, 0, 0);
-  state.target = state.ramoArriba ? alto * 0.68 : alto * 0.82;
+  // Sube SOLO un poquito: de 0.82 a 0.76
+  state.target = state.ramoArriba ? alto * 0.76 : alto * 0.82;
   dibujar = create(pincel, ancho, alto);
 }
 
@@ -578,9 +576,9 @@ function revealMessage() {
   btn.style.opacity = '0';
   setTimeout(() => { btn.style.display = 'none'; }, 500);
 
-  // Subimos el ramo
+  // Subimos el ramo SOLO un poquito
   state.ramoArriba = true;
-  state.target = alto * 0.68;
+  state.target = alto * 0.76;
 
   // El título se desvanece
   document.getElementById('titulo').classList.add('oculto');
