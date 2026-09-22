@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>holaa</title>
+<title>Para ti 🌷</title>
 
 <style>
   html, body {
@@ -53,8 +53,6 @@
   }
 
   /* ---------- TÍTULO ---------- */
-  /* Visible desde el principio arriba del ramo.
-     Al pulsar el botón se desvanece. */
   .titulo {
     position: fixed;
     left: 50%;
@@ -74,17 +72,16 @@
     text-shadow: 0 2px 12px rgba(0,0,0,0.6);
   }
 
-  /* Al pulsar, el título se desvanece hacia arriba */
   .titulo.oculto {
     opacity: 0;
     transform: translateX(-50%) translateY(-30px);
   }
 
-  /* ---------- TEXTO (oculto al inicio) ---------- */
+  /* ---------- TEXTO ---------- */
   .texto {
     position: fixed;
     left: 50%;
-    bottom: 6%;
+    bottom: 4%;
     z-index: 50;
     opacity: 0;
     transform: translateX(-50%) translateY(30px);
@@ -98,12 +95,26 @@
     font-weight: 500;
     max-width: 520px;
     line-height: 1.55;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9);
   }
 
   .texto.mostrar-texto {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
+  }
+
+  /* ---------- AJUSTES PARA CELULAR (vertical) ---------- */
+  @media (max-aspect-ratio: 1/1) {
+    .texto {
+      font-size: clamp(0.85rem, 3.5vw, 1rem);
+      max-width: 88%;
+      bottom: 3%;
+      line-height: 1.45;
+      text-shadow: 0 2px 14px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9);
+    }
+    .titulo {
+      font-size: clamp(1rem, 4.5vw, 1.4rem);
+    }
   }
 
   /* ---------- LLUVIA DE PÉTALOS ---------- */
@@ -120,12 +131,8 @@
   }
 
   @keyframes fall {
-    0% {
-      transform: translateY(0) rotate(0deg);
-    }
-    100% {
-      transform: translateY(105vh) rotate(360deg);
-    }
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(105vh) rotate(360deg); }
   }
 </style>
 </head>
@@ -138,7 +145,7 @@
 <p class="texto" id="texto">
   "Yo vi esta flor y pensé en ti porque es bonita, y bueno, en realidad a mí no me gusta, pero creí que te gustaría porque tú sí eres bonita."
   <br>
-  <span style="font-size: 0.85em; opacity: 0.8; font-style: italic;">Sí, es de Shrek💛</span>
+  <span style="font-size: 0.85em; opacity: 0.85; font-style: italic;">Sí, es de Shrek💛</span>
 </p>
 
 <button id="actionBtn" class="btn-regalo" onclick="revealMessage()">Toca aquí 💛</button>
@@ -329,7 +336,9 @@ const bg = {
 
 function create(ctx, w, h) {
   const cx = w / 2;
-  const S = Math.min(w, h * 0.7);
+  // Si la pantalla es vertical (celular), hacemos el ramo más pequeño
+  const vertical = h > w;
+  const S = Math.min(w, h * (vertical ? 0.5 : 0.7));
 
   const paletaGrande = [
     { angle: 0,      dist: 0.00, len: 1.00, size: 0.095 },
@@ -421,7 +430,7 @@ function create(ctx, w, h) {
     return { grow, base, ctrl, tip };
   }
 
-  let groundY = h * 0.82;
+  let groundY = vertical ? h * 0.78 : h * 0.82;
 
   return (t, dt) => {
     groundY += (state.target - groundY) * Math.min(1, dt * 3);
@@ -549,7 +558,17 @@ function preparar() {
   lienzo.width = Math.round(ancho * escala);
   lienzo.height = Math.round(alto * escala);
   pincel.setTransform(escala, 0, 0, escala, 0, 0);
-  state.target = state.ramoArriba ? alto * 0.68 : alto * 0.82;
+
+  // En celular (vertical), subimos el ramo MUCHO más para dejar espacio al texto.
+  const vertical = alto > ancho;
+  if (state.ramoArriba) {
+    // Cuando ya se pulsó el botón
+    state.target = vertical ? alto * 0.42 : alto * 0.68;
+  } else {
+    // Al inicio
+    state.target = vertical ? alto * 0.78 : alto * 0.82;
+  }
+
   dibujar = create(pincel, ancho, alto);
 }
 
@@ -578,14 +597,12 @@ function revealMessage() {
   btn.style.opacity = '0';
   setTimeout(() => { btn.style.display = 'none'; }, 500);
 
-  // Subimos el ramo
+  const vertical = alto > ancho;
   state.ramoArriba = true;
-  state.target = alto * 0.68;
+  // En celular el ramo sube MUCHO más arriba
+  state.target = vertical ? alto * 0.42 : alto * 0.68;
 
-  // El título se desvanece
   document.getElementById('titulo').classList.add('oculto');
-
-  // El texto aparece
   document.getElementById('texto').classList.add('mostrar-texto');
 
   if (!raining) {
