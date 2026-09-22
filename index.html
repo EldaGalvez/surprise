@@ -11,9 +11,6 @@
     margin: 0;
     overflow: hidden;
     background: #0b1a2a;
-    /* Aprovecha el área segura en iPhones con notch */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    box-sizing: border-box;
   }
 
   canvas {
@@ -25,42 +22,31 @@
     z-index: 1;
   }
 
-  /* ---------- BOTÓN ---------- */
   .btn-regalo {
     position: fixed;
     left: 50%;
-    bottom: max(24px, env(safe-area-inset-bottom));
+    bottom: 24px;
     transform: translateX(-50%);
     z-index: 100;
-    display: inline-block;
     background: linear-gradient(135deg, #ffd600, #ffab00);
     border: none;
-    padding: clamp(10px, 2.5vw, 14px) clamp(24px, 6vw, 40px);
-    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+    padding: 12px 30px;
+    font-size: 1rem;
     font-weight: bold;
     color: #263238;
     border-radius: 30px;
     cursor: pointer;
     box-shadow: 0 6px 20px rgba(255, 214, 0, 0.4);
-    transition: transform 0.2s, box-shadow 0.2s, opacity 0.5s;
+    transition: transform 0.2s, opacity 0.5s;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     white-space: nowrap;
   }
+  .btn-regalo:active { transform: translateX(-50%) scale(0.96); }
 
-  .btn-regalo:hover {
-    transform: translateX(-50%) scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 214, 0, 0.6);
-  }
-
-  .btn-regalo:active {
-    transform: translateX(-50%) scale(0.97);
-  }
-
-  /* ---------- TÍTULO ---------- */
   .titulo {
     position: fixed;
     left: 50%;
-    top: max(3vh, 16px);
+    top: 3vh;
     transform: translateX(-50%);
     z-index: 50;
     opacity: 1;
@@ -68,25 +54,23 @@
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     text-align: center;
     pointer-events: none;
-    padding: 0 20px;
+    padding: 0 16px;
     color: #ffe066;
-    font-size: clamp(1rem, 3.5vw + 0.5vh, 1.8rem);
+    font-size: clamp(1rem, 4vw, 1.6rem);
     font-weight: 800;
     letter-spacing: 0.05em;
     text-shadow: 0 2px 12px rgba(0,0,0,0.6);
-    max-width: 90vw;
+    max-width: 92vw;
   }
-
   .titulo.oculto {
     opacity: 0;
     transform: translateX(-50%) translateY(-30px);
   }
 
-  /* ---------- TEXTO ---------- */
   .texto {
     position: fixed;
     left: 50%;
-    bottom: max(3vh, 16px);
+    bottom: 3vh;
     z-index: 50;
     opacity: 0;
     transform: translateX(-50%) translateY(30px);
@@ -94,37 +78,19 @@
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     text-align: center;
     pointer-events: none;
-    padding: 0 clamp(12px, 4vw, 24px);
+    padding: 0 16px;
     color: #fff;
-    /* Tamaño fluido: se adapta al ancho del viewport */
-    font-size: clamp(0.82rem, 2.4vw + 0.3vh, 1.15rem);
+    font-size: clamp(0.85rem, 3vw, 1.1rem);
     font-weight: 500;
     max-width: min(560px, 92vw);
     line-height: 1.5;
     text-shadow: 0 2px 14px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,1);
   }
-
   .texto.mostrar-texto {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
 
-  /* En pantallas horizontales bajas (celular acostado), el texto
-     se hace más pequeño y se pega más al borde inferior. */
-  @media (orientation: landscape) and (max-height: 500px) {
-    .texto {
-      font-size: clamp(0.75rem, 1.8vw, 0.95rem);
-      max-width: 70vw;
-      bottom: max(2vh, 8px);
-      line-height: 1.35;
-    }
-    .titulo {
-      font-size: clamp(0.9rem, 2vw, 1.2rem);
-      top: max(2vh, 8px);
-    }
-  }
-
-  /* ---------- LLUVIA DE PÉTALOS ---------- */
   .floating-petal {
     position: fixed;
     top: -30px;
@@ -136,16 +102,32 @@
     animation: fall linear forwards;
     filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
   }
-
   @keyframes fall {
     0% { transform: translateY(0) rotate(0deg); }
     100% { transform: translateY(105vh) rotate(360deg); }
+  }
+
+  /* --- DEBUG (opcional, se puede quitar) --- */
+  .debug {
+    position: fixed;
+    left: 8px;
+    top: 8px;
+    z-index: 200;
+    color: #0f0;
+    background: rgba(0,0,0,0.7);
+    font-family: monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    pointer-events: none;
   }
 </style>
 </head>
 <body>
 
 <canvas></canvas>
+
+<div class="debug" id="debug"></div>
 
 <h2 class="titulo" id="titulo">Un tulipán, no de Shrek</h2>
 
@@ -193,7 +175,6 @@ function strokePartialCurve(ctx, p0, p1, p2, amount, steps = 24) {
   }
   ctx.stroke();
 }
-
 function drawLeaf(ctx, x, y, length, angle, color = '#37b24d') {
   if (length <= 0.5) return;
   ctx.save();
@@ -213,7 +194,6 @@ function drawLeaf(ctx, x, y, length, angle, color = '#37b24d') {
   ctx.stroke();
   ctx.restore();
 }
-
 function drawPetal(ctx, s, color) {
   ctx.beginPath();
   ctx.moveTo(0, 0);
@@ -223,7 +203,6 @@ function drawPetal(ctx, s, color) {
   ctx.fillStyle = color;
   ctx.fill();
 }
-
 function drawTulip(ctx, x, y, size, angle, colors) {
   const [light, mid] = colors;
   ctx.save();
@@ -233,12 +212,9 @@ function drawTulip(ctx, x, y, size, angle, colors) {
   drawPetal(ctx, size * 0.85, light);
   ctx.restore();
 }
-
 function drawRibbon(ctx, x, y, size) {
   ctx.save();
   ctx.translate(x, y);
-
-  // Colas
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.beginPath();
@@ -259,8 +235,6 @@ function drawRibbon(ctx, x, y, size) {
     ctx.stroke();
     ctx.restore();
   }
-
-  // Bucles grandes
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.scale(side, 1);
@@ -277,22 +251,18 @@ function drawRibbon(ctx, x, y, size) {
     ctx.strokeStyle = 'rgba(120, 120, 120, 0.35)';
     ctx.lineWidth = 1;
     ctx.stroke();
-
     ctx.beginPath();
     ctx.moveTo(size * 0.1, 0);
     ctx.bezierCurveTo(size * 0.7, -size * 0.4, size * 1.2, -size * 0.1, size * 1.0, size * 0.15);
     ctx.bezierCurveTo(size * 0.8, size * 0.25, size * 0.5, size * 0.15, size * 0.1, 0);
     ctx.fillStyle = 'rgba(180, 180, 180, 0.45)';
     ctx.fill();
-
     ctx.beginPath();
     ctx.ellipse(size * 0.7, -size * 0.35, size * 0.30, size * 0.14, -0.4, 0, TAU);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.fill();
     ctx.restore();
   }
-
-  // Bucles pequeños
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.scale(side, 1);
@@ -307,8 +277,6 @@ function drawRibbon(ctx, x, y, size) {
     ctx.stroke();
     ctx.restore();
   }
-
-  // Nudo
   ctx.save();
   ctx.beginPath();
   ctx.ellipse(0, size * 0.08, size * 0.28, size * 0.26, 0, 0, TAU);
@@ -321,13 +289,11 @@ function drawRibbon(ctx, x, y, size) {
   ctx.strokeStyle = 'rgba(120, 120, 120, 0.45)';
   ctx.lineWidth = 1;
   ctx.stroke();
-
   ctx.beginPath();
   ctx.ellipse(-size * 0.07, size * 0.02, size * 0.08, size * 0.05, -0.3, 0, TAU);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
   ctx.fill();
   ctx.restore();
-
   ctx.restore();
 }
 
@@ -337,73 +303,59 @@ const COLORES_TULIPAN = [
   ['#fff3bf', '#ffd43b', '#fab005'],
   ['#ffe8a3', '#ffc300', '#d97706'],
 ];
+const bg = { top: '#0a1220', mid: '#0d1f38', bot: '#08101c' };
 
-const bg = {
-  top: '#0a1220',
-  mid: '#0d1f38',
-  bot: '#08101c',
+// ====================================================
+// ESTADO GLOBAL
+// ====================================================
+const state = {
+  // Progreso de subida: 0 = abajo, 1 = arriba
+  progress: 0,
+  ramoArriba: false,
 };
 
-function create(ctx, w, h) {
-  const cx = w / 2;
+// ====================================================
+// CREACIÓN DE LA ESCENA (una sola vez)
+// ====================================================
+// Definimos el "modelo" del ramo en un sistema de coordenadas
+// normalizado, donde:
+//   - cx = 0.5 (centro horizontal)
+//   - groundY = 1.0 (base del ramo en el fondo)
+//   - cada flor tiene tamaños relativos al viewport
+//
+// Esto permite redimensionar sin recrear el modelo.
 
-  // ====================================================
-  // CÁLCULO DEL TAMAÑO DEL RAMO (totalmente adaptativo)
-  // ====================================================
-  // Reglas:
-  // 1) El ramo nunca debe ser más ancho que el 85% del ancho visible.
-  // 2) El ramo nunca debe ser más alto que el 60% de la altura (para
-  //    dejar sitio al texto abajo).
-  // 3) En pantallas horizontales, el ramo puede ser más alto porque
-  //    el texto va centrado abajo.
-  const ratio = w / h;
-  let maxRamoW, maxRamoH;
-  if (ratio > 1.2) {
-    // Muy horizontal (laptop, tablet acostada, celular acostado)
-    maxRamoW = w * 0.75;
-    maxRamoH = h * 0.85;
-  } else if (ratio > 0.8) {
-    // Casi cuadrado (tablet en vertical)
-    maxRamoW = w * 0.80;
-    maxRamoH = h * 0.60;
-  } else {
-    // Muy vertical (celular)
-    maxRamoW = w * 0.88;
-    maxRamoH = h * 0.58;
-  }
+const paletaGrande = [
+  { angle: 0,      dist: 0.00, len: 1.00, size: 0.095 },
+  { angle: -0.20,  dist: 0.30, len: 0.98, size: 0.092 },
+  { angle: 0.20,   dist: 0.30, len: 0.98, size: 0.092 },
+  { angle: -0.45,  dist: 0.65, len: 0.85, size: 0.090, leaf: true, side: -1 },
+  { angle: 0.45,   dist: 0.65, len: 0.85, size: 0.090, leaf: true, side:  1 },
+  { angle: 0,      dist: 0.05, len: 0.88, size: 0.088 },
+];
+const paletaPequena = [
+  { angle: -0.10,  dist: 0.15, len: 0.78, size: 0.058 },
+  { angle: 0.10,   dist: 0.15, len: 0.78, size: 0.058 },
+  { angle: -0.30,  dist: 0.45, len: 0.72, size: 0.055 },
+  { angle: 0.30,   dist: 0.45, len: 0.72, size: 0.055 },
+  { angle: -0.55,  dist: 0.75, len: 0.62, size: 0.052 },
+  { angle: 0.55,   dist: 0.75, len: 0.62, size: 0.052 },
+];
+const paletaMini = [
+  { angle: -0.20,  dist: 0.30, len: 0.55, size: 0.036 },
+  { angle: 0.20,   dist: 0.30, len: 0.55, size: 0.036 },
+  { angle: -0.42,  dist: 0.62, len: 0.50, size: 0.034 },
+  { angle: 0.42,   dist: 0.62, len: 0.50, size: 0.034 },
+];
 
-  const S = Math.min(maxRamoW, maxRamoH);
-
-  const paletaGrande = [
-    { angle: 0,      dist: 0.00, len: 1.00, size: 0.095 },
-    { angle: -0.20,  dist: 0.30, len: 0.98, size: 0.092 },
-    { angle: 0.20,   dist: 0.30, len: 0.98, size: 0.092 },
-    { angle: -0.45,  dist: 0.65, len: 0.85, size: 0.090, leaf: true, side: -1 },
-    { angle: 0.45,   dist: 0.65, len: 0.85, size: 0.090, leaf: true, side:  1 },
-    { angle: 0,      dist: 0.05, len: 0.88, size: 0.088 },
-  ];
-  const paletaPequena = [
-    { angle: -0.10,  dist: 0.15, len: 0.78, size: 0.058 },
-    { angle: 0.10,   dist: 0.15, len: 0.78, size: 0.058 },
-    { angle: -0.30,  dist: 0.45, len: 0.72, size: 0.055 },
-    { angle: 0.30,   dist: 0.45, len: 0.72, size: 0.055 },
-    { angle: -0.55,  dist: 0.75, len: 0.62, size: 0.052 },
-    { angle: 0.55,   dist: 0.75, len: 0.62, size: 0.052 },
-  ];
-  const paletaMini = [
-    { angle: -0.20,  dist: 0.30, len: 0.55, size: 0.036 },
-    { angle: 0.20,   dist: 0.30, len: 0.55, size: 0.036 },
-    { angle: -0.42,  dist: 0.62, len: 0.50, size: 0.034 },
-    { angle: 0.42,   dist: 0.62, len: 0.50, size: 0.034 },
-  ];
-
+function buildFlores() {
   const grandes = paletaGrande.map((p, i) => {
     const hojas = p.leaf ? [{ u: 0.45, side: p.side, size: 1.0 }] : [];
     return {
       angle: p.angle + rand(-0.02, 0.02),
       dist: p.dist,
-      length: S * 0.55 * p.len * rand(0.97, 1.03),
-      size: S * p.size * rand(0.97, 1.03),
+      len: p.len * rand(0.97, 1.03),
+      size: p.size * rand(0.97, 1.03),
       colors: COLORES_TULIPAN[i % COLORES_TULIPAN.length],
       delay: 0.1 + Math.abs(p.dist) * 0.3 + rand(0, 0.15),
       phase: rand(0, TAU),
@@ -414,8 +366,8 @@ function create(ctx, w, h) {
   const pequenas = paletaPequena.map((p, i) => ({
     angle: p.angle + rand(-0.02, 0.02),
     dist: p.dist,
-    length: S * 0.55 * p.len * rand(0.95, 1.05),
-    size: S * p.size * rand(0.95, 1.05),
+    len: p.len * rand(0.95, 1.05),
+    size: p.size * rand(0.95, 1.05),
     colors: COLORES_TULIPAN[(i + 2) % COLORES_TULIPAN.length],
     delay: 0.4 + Math.abs(p.dist) * 0.25 + rand(0, 0.15),
     phase: rand(0, TAU),
@@ -425,211 +377,240 @@ function create(ctx, w, h) {
   const minis = paletaMini.map((p, i) => ({
     angle: p.angle + rand(-0.02, 0.02),
     dist: p.dist,
-    length: S * 0.55 * p.len * rand(0.95, 1.05),
-    size: S * p.size * rand(0.95, 1.05),
+    len: p.len * rand(0.95, 1.05),
+    size: p.size * rand(0.95, 1.05),
     colors: COLORES_TULIPAN[(i + 1) % COLORES_TULIPAN.length],
     delay: 0.55 + Math.abs(p.dist) * 0.2 + rand(0, 0.15),
     phase: rand(0, TAU),
     leaves: [],
     priority: 3,
   }));
-
-  const flores = [...grandes, ...pequenas, ...minis];
-
-  const motas = Array.from({ length: 55 }, () => ({
-    x: rand(0, w), y: rand(0, h),
-    r: rand(0.8, 2.6),
-    speed: rand(6, 20),
-    drift: rand(-8, 8),
-    phase: rand(0, TAU),
-  }));
-
-  function geometry(f, t, gy) {
-    const grow = easeOutCubic(clamp((t - f.delay) / 1.3));
-    const sway = Math.sin(t * 0.8 + f.phase) * 0.04 * (0.3 + f.dist);
-    const base = { x: cx + f.angle * 4, y: gy };
-    const tipAngle = f.angle + sway;
-    const tip = {
-      x: base.x + Math.sin(tipAngle) * f.length * grow,
-      y: base.y - Math.cos(tipAngle) * f.length * grow,
-    };
-    const ctrl = {
-      x: base.x + Math.sin(f.angle * 0.5) * f.length * 0.15,
-      y: base.y - f.length * 0.55 * grow,
-    };
-    return { grow, base, ctrl, tip };
-  }
-
-  // Punto de unión inicial: dependiendo del formato
-  const vertical = h > w;
-  let groundY = vertical ? h * 0.78 : h * 0.82;
-
-  return (t, dt) => {
-    groundY += (state.target - groundY) * Math.min(1, dt * 3);
-
-    const grad = ctx.createRadialGradient(cx, h * 0.45, 0, cx, h * 0.55, Math.max(w, h));
-    grad.addColorStop(0, bg.mid);
-    grad.addColorStop(0.5, bg.top);
-    grad.addColorStop(1, bg.bot);
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-
-    const halo = ctx.createRadialGradient(cx, h * 0.4, 0, cx, h * 0.5, S * 0.85);
-    halo.addColorStop(0, 'rgba(255, 210, 90, 0.18)');
-    halo.addColorStop(0.4, 'rgba(255, 180, 60, 0.06)');
-    halo.addColorStop(1, 'rgba(255, 160, 40, 0)');
-    ctx.fillStyle = halo;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.fillStyle = '#ffd43b';
-    for (const m of motas) {
-      const y = (((m.y - t * m.speed) % h) + h) % h;
-      const x = m.x + Math.sin(t * 0.6 + m.phase) * m.drift;
-      ctx.globalAlpha = 0.15 + 0.5 * (0.5 + 0.5 * Math.sin(t * 1.5 + m.phase));
-      ctx.beginPath();
-      ctx.arc(x, y, m.r, 0, TAU);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    const orden = [...flores].sort((a, b) => {
-      if (a.priority !== b.priority) return a.priority - b.priority;
-      return Math.abs(b.dist) - Math.abs(a.dist);
-    });
-
-    for (const f of orden) {
-      const { grow, base, ctrl, tip } = geometry(f, t, groundY);
-      if (grow <= 0) continue;
-
-      ctx.lineCap = 'round';
-      const gradStem = ctx.createLinearGradient(base.x, base.y, tip.x, tip.y);
-      gradStem.addColorStop(0, '#1e4d2b');
-      gradStem.addColorStop(0.5, '#3a8a44');
-      gradStem.addColorStop(1, '#4caf50');
-      ctx.strokeStyle = gradStem;
-      ctx.lineWidth = Math.max(2, f.size * 0.16);
-      strokePartialCurve(ctx, base, ctrl, tip, grow);
-
-      for (const lf of f.leaves) {
-        const appear = easeOutBack(clamp((grow - lf.u) / 0.4));
-        if (appear <= 0.01) continue;
-        const p = qpoint(base, ctrl, tip, lf.u * grow);
-        const d = qderiv(base, ctrl, tip, lf.u * grow);
-        const baseAngle = Math.atan2(d.y, d.x);
-        const hojaAngle = baseAngle + lf.side * 0.65;
-        const hojaLen = f.size * 2.4 * appear * lf.size;
-        const gradHoja = ctx.createLinearGradient(
-          p.x, p.y,
-          p.x + Math.cos(hojaAngle) * hojaLen,
-          p.y + Math.sin(hojaAngle) * hojaLen
-        );
-        gradHoja.addColorStop(0, '#2e7d32');
-        gradHoja.addColorStop(1, '#66bb6a');
-
-        ctx.save();
-        ctx.strokeStyle = '#3a8a44';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        const hx = p.x + Math.cos(hojaAngle) * hojaLen * 0.15;
-        const hy = p.y + Math.sin(hojaAngle) * hojaLen * 0.15;
-        ctx.lineTo(hx, hy);
-        ctx.stroke();
-        drawLeaf(ctx, hx, hy, hojaLen, hojaAngle, gradHoja);
-        ctx.restore();
-      }
-    }
-
-    for (const f of orden) {
-      const bloom = easeOutBack(clamp((t - f.delay - 1.0) / 0.8));
-      if (bloom <= 0.01) continue;
-      const { grow, base, ctrl, tip } = geometry(f, t, groundY);
-      if (grow <= 0) continue;
-
-      const head = qpoint(base, ctrl, tip, grow);
-      const d = qderiv(base, ctrl, tip, grow);
-      const angle = Math.atan2(d.y, d.x) + Math.PI / 2;
-      drawTulip(ctx, head.x, head.y, f.size * bloom, angle, f.colors);
-    }
-
-    const ribbonAppear = easeOutBack(clamp((t - 0.2) / 1.0));
-    if (ribbonAppear > 0.01) {
-      const ribbonY = groundY - S * 0.15;
-      drawRibbon(ctx, cx, ribbonY, S * 0.100 * ribbonAppear);
-    }
-
-    const shadow = ctx.createRadialGradient(
-      cx, groundY + S * 0.18, 0,
-      cx, groundY + S * 0.18, S * 0.5
-    );
-    shadow.addColorStop(0, 'rgba(0, 0, 0, 0.30)');
-    shadow.addColorStop(0.6, 'rgba(0, 0, 0, 0.10)');
-    shadow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = shadow;
-    ctx.fillRect(0, 0, w, h);
-  };
+  return [...grandes, ...pequenas, ...minis].sort((a, b) => {
+    if (a.priority !== b.priority) return a.priority - b.priority;
+    return Math.abs(b.dist) - Math.abs(a.dist);
+  });
 }
 
-// ====================================================
-// ESTADO + INICIALIZACIÓN
-// ====================================================
-const state = {
-  target: 0,
-  ramoArriba: false,
-};
+const flores = buildFlores();
 
+const motas = Array.from({ length: 55 }, () => ({
+  x: Math.random(), y: Math.random(),
+  r: rand(0.8, 2.6),
+  speed: rand(6, 20),
+  drift: rand(-8, 8),
+  phase: rand(0, TAU),
+}));
+
+// ====================================================
+// RENDER
+// ====================================================
 const lienzo = document.querySelector('canvas');
 const pincel = lienzo.getContext('2d');
+const debugEl = document.getElementById('debug');
 
-let dibujar;
-let ancho = 0, alto = 0, escala = 1;
+let anchoCSS = 0, altoCSS = 0, escalaDPR = 1;
 let tiempo = 0, anterior = performance.now();
 
-// Calcula la Y objetivo según el estado actual (arriba o abajo)
-// y el formato de pantalla (vertical u horizontal).
-function calcularTarget() {
-  const vertical = alto > ancho;
-  const ratio = ancho / alto;
-  if (state.ramoArriba) {
-    // Cuando el ramo sube, se coloca arriba dejando sitio al texto
-    if (ratio > 1.2) return alto * 0.55;      // horizontal ancho: sube poco
-    if (ratio > 0.8) return alto * 0.45;      // tablet vertical: medio
-    return alto * 0.35;                        // celular vertical: arriba
+function medirYRenderizar() {
+  anchoCSS = innerWidth;
+  altoCSS = innerHeight;
+  escalaDPR = Math.min(devicePixelRatio || 1, 2);
+  lienzo.width = Math.round(anchoCSS * escalaDPR);
+  lienzo.height = Math.round(altoCSS * escalaDPR);
+  pincel.setTransform(escalaDPR, 0, 0, escalaDPR, 0, 0);
+}
+
+// Calcula el "tamaño base" S del ramo en función del viewport.
+// Este S es la escala del sistema de coordenadas del modelo.
+function calcularS() {
+  const w = anchoCSS, h = altoCSS;
+  const vertical = h > w;
+  // Límites:
+  // - En horizontal, el ramo puede ocupar mucho más alto
+  // - En vertical, hay que dejar sitio al texto abajo
+  const limiteAncho = w * 0.85;
+  const limiteAlto = vertical ? h * 0.55 : h * 0.85;
+  return Math.min(limiteAncho, limiteAlto);
+}
+
+// Calcula la Y del punto de unión de los tallos.
+// progress: 0 = abajo, 1 = arriba
+function calcularGroundY() {
+  const h = altoCSS;
+  const vertical = h > anchoCSS;
+  // Rango de Y: desde abajo (baseY) hasta arriba (topY)
+  let baseY, topY;
+  if (vertical) {
+    baseY = h * 0.78;   // posición inicial (abajo)
+    topY  = h * 0.42;   // posición elevada (arriba)
   } else {
-    // Estado inicial: ramo abajo
-    return vertical ? alto * 0.78 : alto * 0.82;
+    baseY = h * 0.82;
+    topY  = h * 0.65;
   }
+  return baseY + (topY - baseY) * state.progress;
 }
 
-function preparar() {
-  ancho = innerWidth;
-  alto = innerHeight;
-  escala = Math.min(devicePixelRatio || 1, 2);
-  lienzo.width = Math.round(ancho * escala);
-  lienzo.height = Math.round(alto * escala);
-  pincel.setTransform(escala, 0, 0, escala, 0, 0);
-  state.target = calcularTarget();
-  dibujar = create(pincel, ancho, alto);
-}
-
-function cuadro(ahora) {
+function frame(ahora) {
   const dt = Math.min((ahora - anterior) / 1000, 0.1);
   anterior = ahora;
   tiempo += dt;
-  pincel.setTransform(escala, 0, 0, escala, 0, 0);
+
+  // Actualizar progreso suavemente
+  const targetProg = state.ramoArriba ? 1 : 0;
+  state.progress += (targetProg - state.progress) * Math.min(1, dt * 2.5);
+
+  // Dimensiones actuales
+  const w = anchoCSS;
+  const h = altoCSS;
+  const S = calcularS();
+  const groundY = calcularGroundY();
+  const cx = w / 2;
+
+  // Debug
+  debugEl.textContent =
+    `w:${Math.round(w)} h:${Math.round(h)} S:${Math.round(S)} gY:${Math.round(groundY)} p:${state.progress.toFixed(2)}`;
+
+  // ---- Fondo ----
+  const grad = pincel.createRadialGradient(cx, h * 0.45, 0, cx, h * 0.55, Math.max(w, h));
+  grad.addColorStop(0, bg.mid);
+  grad.addColorStop(0.5, bg.top);
+  grad.addColorStop(1, bg.bot);
+  pincel.fillStyle = grad;
+  pincel.fillRect(0, 0, w, h);
+
+  const halo = pincel.createRadialGradient(cx, h * 0.4, 0, cx, h * 0.5, S * 0.9);
+  halo.addColorStop(0, 'rgba(255, 210, 90, 0.18)');
+  halo.addColorStop(0.4, 'rgba(255, 180, 60, 0.06)');
+  halo.addColorStop(1, 'rgba(255, 160, 40, 0)');
+  pincel.fillStyle = halo;
+  pincel.fillRect(0, 0, w, h);
+
+  // ---- Motas ----
+  pincel.fillStyle = '#ffd43b';
+  for (const m of motas) {
+    const y = (((m.y * h - tiempo * m.speed) % h) + h) % h;
+    const x = m.x * w + Math.sin(tiempo * 0.6 + m.phase) * m.drift;
+    pincel.globalAlpha = 0.15 + 0.5 * (0.5 + 0.5 * Math.sin(tiempo * 1.5 + m.phase));
+    pincel.beginPath();
+    pincel.arc(x, y, m.r, 0, TAU);
+    pincel.fill();
+  }
   pincel.globalAlpha = 1;
-  pincel.globalCompositeOperation = 'source-over';
-  dibujar(tiempo, dt);
-  requestAnimationFrame(cuadro);
+
+  // ---- Tallos ----
+  const geometry = (f) => {
+    const grow = easeOutCubic(clamp((tiempo - f.delay) / 1.3));
+    const sway = Math.sin(tiempo * 0.8 + f.phase) * 0.04 * (0.3 + f.dist);
+    const base = { x: cx + f.angle * S * 0.008, y: groundY };
+    const length = S * 0.62 * f.len;
+    const tipAngle = f.angle + sway;
+    const tip = {
+      x: base.x + Math.sin(tipAngle) * length * grow,
+      y: base.y - Math.cos(tipAngle) * length * grow,
+    };
+    const ctrl = {
+      x: base.x + Math.sin(f.angle * 0.5) * length * 0.15,
+      y: base.y - length * 0.55 * grow,
+    };
+    return { grow, base, ctrl, tip, length };
+  };
+
+  for (const f of flores) {
+    const { grow, base, ctrl, tip, length } = geometry(f);
+    if (grow <= 0) continue;
+
+    pincel.lineCap = 'round';
+    const gradStem = pincel.createLinearGradient(base.x, base.y, tip.x, tip.y);
+    gradStem.addColorStop(0, '#1e4d2b');
+    gradStem.addColorStop(0.5, '#3a8a44');
+    gradStem.addColorStop(1, '#4caf50');
+    pincel.strokeStyle = gradStem;
+    pincel.lineWidth = Math.max(2, f.size * S * 0.16);
+    strokePartialCurve(pincel, base, ctrl, tip, grow);
+
+    for (const lf of f.leaves) {
+      const appear = easeOutBack(clamp((grow - lf.u) / 0.4));
+      if (appear <= 0.01) continue;
+      const p = qpoint(base, ctrl, tip, lf.u * grow);
+      const d = qderiv(base, ctrl, tip, lf.u * grow);
+      const baseAngle = Math.atan2(d.y, d.x);
+      const hojaAngle = baseAngle + lf.side * 0.65;
+      const hojaLen = f.size * S * 2.4 * appear * lf.size;
+      const gradHoja = pincel.createLinearGradient(
+        p.x, p.y,
+        p.x + Math.cos(hojaAngle) * hojaLen,
+        p.y + Math.sin(hojaAngle) * hojaLen
+      );
+      gradHoja.addColorStop(0, '#2e7d32');
+      gradHoja.addColorStop(1, '#66bb6a');
+      pincel.save();
+      pincel.strokeStyle = '#3a8a44';
+      pincel.lineWidth = 1.5;
+      pincel.beginPath();
+      pincel.moveTo(p.x, p.y);
+      const hx = p.x + Math.cos(hojaAngle) * hojaLen * 0.15;
+      const hy = p.y + Math.sin(hojaAngle) * hojaLen * 0.15;
+      pincel.lineTo(hx, hy);
+      pincel.stroke();
+      drawLeaf(pincel, hx, hy, hojaLen, hojaAngle, gradHoja);
+      pincel.restore();
+    }
+  }
+
+  // ---- Flores ----
+  for (const f of flores) {
+    const bloom = easeOutBack(clamp((tiempo - f.delay - 1.0) / 0.8));
+    if (bloom <= 0.01) continue;
+    const { grow, base, ctrl, tip } = geometry(f);
+    if (grow <= 0) continue;
+    const head = qpoint(base, ctrl, tip, grow);
+    const d = qderiv(base, ctrl, tip, grow);
+    const angle = Math.atan2(d.y, d.x) + Math.PI / 2;
+    drawTulip(pincel, head.x, head.y, f.size * S * bloom, angle, f.colors);
+  }
+
+  // ---- Lazo ----
+  const ribbonAppear = easeOutBack(clamp((tiempo - 0.2) / 1.0));
+  if (ribbonAppear > 0.01) {
+    const ribbonY = groundY - S * 0.10;
+    drawRibbon(pincel, cx, ribbonY, S * 0.10 * ribbonAppear);
+  }
+
+  // ---- Sombra ----
+  const shadow = pincel.createRadialGradient(
+    cx, groundY + S * 0.18, 0,
+    cx, groundY + S * 0.18, S * 0.5
+  );
+  shadow.addColorStop(0, 'rgba(0, 0, 0, 0.30)');
+  shadow.addColorStop(0.6, 'rgba(0, 0, 0, 0.10)');
+  shadow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  pincel.fillStyle = shadow;
+  pincel.fillRect(0, 0, w, h);
+
+  requestAnimationFrame(frame);
 }
 
-addEventListener('resize', () => {
-  if (innerWidth !== ancho || innerHeight !== alto) preparar();
-});
+// ====================================================
+// REACCIÓN AL VIEWPORT
+// ====================================================
+function medir() {
+  medirYRenderizar();
+}
 
-preparar();
-requestAnimationFrame(cuadro);
+addEventListener('resize', medir);
+addEventListener('orientationchange', () => setTimeout(medir, 200));
+// Detectar cambios de tamaño del viewport en móviles (barra de URL)
+if ('visualViewport' in window) {
+  window.visualViewport.addEventListener('resize', medir);
+  window.visualViewport.addEventListener('scroll', medir);
+}
 
+medir();
+requestAnimationFrame(frame);
+
+// ====================================================
+// BOTÓN
+// ====================================================
 let raining = false;
 
 function revealMessage() {
@@ -638,16 +619,13 @@ function revealMessage() {
   setTimeout(() => { btn.style.display = 'none'; }, 500);
 
   state.ramoArriba = true;
-  state.target = calcularTarget();
 
   document.getElementById('titulo').classList.add('oculto');
   document.getElementById('texto').classList.add('mostrar-texto');
 
   if (!raining) {
     raining = true;
-    for (let i = 0; i < 15; i++) {
-      setTimeout(createPetal, i * 60);
-    }
+    for (let i = 0; i < 15; i++) setTimeout(createPetal, i * 60);
     setInterval(createPetal, 180);
   }
 }
@@ -655,20 +633,14 @@ function revealMessage() {
 function createPetal() {
   const petal = document.createElement('div');
   petal.className = 'floating-petal';
-
   const size = Math.random() * 12 + 10;
   petal.style.width = `${size}px`;
   petal.style.height = `${size * 1.5}px`;
   petal.style.left = Math.random() * window.innerWidth + 'px';
-
   const duration = Math.random() * 3 + 3;
   petal.style.animationDuration = duration + 's';
-
   document.body.appendChild(petal);
-
-  setTimeout(() => {
-    petal.remove();
-  }, duration * 1000);
+  setTimeout(() => petal.remove(), duration * 1000);
 }
 </script>
 
