@@ -77,11 +77,11 @@
     transform: translateX(-50%) translateY(-30px);
   }
 
-  /* ---------- TEXTO ---------- */
+  /* ---------- TEXTO (oculto al inicio) ---------- */
   .texto {
     position: fixed;
     left: 50%;
-    bottom: 4%;
+    bottom: 3%;
     z-index: 50;
     opacity: 0;
     transform: translateX(-50%) translateY(30px);
@@ -95,7 +95,6 @@
     font-weight: 500;
     max-width: 520px;
     line-height: 1.55;
-    /* Sombra fuerte para que se lea sobre el ramo */
     text-shadow: 0 2px 14px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,1);
   }
 
@@ -419,12 +418,17 @@ function create(ctx, w, h) {
     return { grow, base, ctrl, tip };
   }
 
-  // El ramo se queda SIEMPRE aquí, en 0.82, no se mueve nunca.
-  let groundY = h * 0.82;
+  // Posición base (abajo, cuando NO hay texto)
+  // y posición elevada (cuando SÍ hay texto).
+  // La diferencia es exactamente el espacio que ocupa el texto.
+  const baseY = h * 0.82;          // posición original
+  const textoAltura = h * 0.22;    // cuánto sube el ramo por el texto
+  let groundY = baseY;
 
   return (t, dt) => {
-    // Eliminamos la interpolación: groundY nunca cambia.
-    // groundY += (state.target - groundY) * Math.min(1, dt * 3);
+    // Interpolación suave hacia el objetivo
+    const objetivo = state.ramoArriba ? baseY - textoAltura : baseY;
+    groundY += (objetivo - groundY) * Math.min(1, dt * 3);
 
     const grad = ctx.createRadialGradient(cx, h * 0.45, 0, cx, h * 0.55, Math.max(w, h));
     grad.addColorStop(0, bg.mid);
@@ -530,6 +534,10 @@ function create(ctx, w, h) {
   };
 }
 
+const state = {
+  ramoArriba: false,
+};
+
 const lienzo = document.querySelector('canvas');
 const pincel = lienzo.getContext('2d');
 
@@ -572,13 +580,12 @@ function revealMessage() {
   btn.style.opacity = '0';
   setTimeout(() => { btn.style.display = 'none'; }, 500);
 
-  // El título se desvanece
-  document.getElementById('titulo').classList.add('oculto');
+  // Esto es lo que hace que el ramo suba: el texto "empuja" al ramo.
+  state.ramoArriba = true;
 
-  // El texto aparece
+  document.getElementById('titulo').classList.add('oculto');
   document.getElementById('texto').classList.add('mostrar-texto');
 
-  // Lluvia de pétalos
   if (!raining) {
     raining = true;
     for (let i = 0; i < 15; i++) {
