@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>holaa</title>
 
 <style>
@@ -22,7 +22,6 @@
     z-index: 1;
   }
 
-  /* ---------- BOTÓN ---------- */
   .btn-regalo {
     position: fixed;
     left: 50%;
@@ -42,17 +41,9 @@
     transition: transform 0.2s, box-shadow 0.2s, opacity 0.5s;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   }
+  .btn-regalo:hover { transform: translateX(-50%) scale(1.05); }
+  .btn-regalo:active { transform: translateX(-50%) scale(0.97); }
 
-  .btn-regalo:hover {
-    transform: translateX(-50%) scale(1.05);
-    box-shadow: 0 8px 25px rgba(255, 214, 0, 0.6);
-  }
-
-  .btn-regalo:active {
-    transform: translateX(-50%) scale(0.97);
-  }
-
-  /* ---------- TÍTULO ---------- */
   .titulo {
     position: fixed;
     left: 50%;
@@ -66,18 +57,16 @@
     pointer-events: none;
     padding: 0 20px;
     color: #ffe066;
-    font-size: clamp(1.1rem, 4vw, 1.8rem);
+    font-size: clamp(1.2rem, 4vw, 1.8rem);
     font-weight: 800;
     letter-spacing: 0.05em;
     text-shadow: 0 2px 12px rgba(0,0,0,0.6);
   }
-
   .titulo.oculto {
     opacity: 0;
     transform: translateX(-50%) translateY(-30px);
   }
 
-  /* ---------- TEXTO (oculto al inicio) ---------- */
   .texto {
     position: fixed;
     left: 50%;
@@ -89,22 +78,19 @@
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     text-align: center;
     pointer-events: none;
-    padding: 0 16px;
+    padding: 0 20px;
     color: #fff;
-    font-size: clamp(0.9rem, 3.4vw, 1.15rem);
+    font-size: clamp(0.95rem, 3vw, 1.15rem);
     font-weight: 500;
-    max-width: min(560px, 92vw);
-    line-height: 1.5;
-    /* Sombra más fuerte para que se lea sobre el fondo y el ramo */
+    max-width: 520px;
+    line-height: 1.55;
     text-shadow: 0 2px 14px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,1);
   }
-
   .texto.mostrar-texto {
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
 
-  /* ---------- LLUVIA DE PÉTALOS ---------- */
   .floating-petal {
     position: fixed;
     top: -30px;
@@ -138,9 +124,6 @@
 <button id="actionBtn" class="btn-regalo" onclick="revealMessage()">Toca aquí 💛</button>
 
 <script>
-// ====================================================
-// 1. ANIMACIÓN DEL RAMO (canvas)
-// ====================================================
 const TAU = Math.PI * 2;
 const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
 const rand = (min, max) => min + Math.random() * (max - min);
@@ -164,7 +147,6 @@ function qderiv(p0, p1, p2, s) {
     y: 2 * (1 - s) * (p1.y - p0.y) + 2 * s * (p2.y - p1.y),
   };
 }
-
 function strokePartialCurve(ctx, p0, p1, p2, amount, steps = 24) {
   ctx.beginPath();
   ctx.moveTo(p0.x, p0.y);
@@ -174,7 +156,6 @@ function strokePartialCurve(ctx, p0, p1, p2, amount, steps = 24) {
   }
   ctx.stroke();
 }
-
 function drawLeaf(ctx, x, y, length, angle, color = '#37b24d') {
   if (length <= 0.5) return;
   ctx.save();
@@ -194,7 +175,6 @@ function drawLeaf(ctx, x, y, length, angle, color = '#37b24d') {
   ctx.stroke();
   ctx.restore();
 }
-
 function drawPetal(ctx, s, color) {
   ctx.beginPath();
   ctx.moveTo(0, 0);
@@ -204,7 +184,6 @@ function drawPetal(ctx, s, color) {
   ctx.fillStyle = color;
   ctx.fill();
 }
-
 function drawTulip(ctx, x, y, size, angle, colors, open) {
   const [light, mid] = colors;
   ctx.save();
@@ -214,11 +193,9 @@ function drawTulip(ctx, x, y, size, angle, colors, open) {
   drawPetal(ctx, size * 0.85, light);
   ctx.restore();
 }
-
 function drawRibbon(ctx, x, y, size, t) {
   ctx.save();
   ctx.translate(x, y);
-
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.beginPath();
@@ -239,7 +216,6 @@ function drawRibbon(ctx, x, y, size, t) {
     ctx.stroke();
     ctx.restore();
   }
-
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.scale(side, 1);
@@ -256,21 +232,18 @@ function drawRibbon(ctx, x, y, size, t) {
     ctx.strokeStyle = 'rgba(120, 120, 120, 0.35)';
     ctx.lineWidth = 1;
     ctx.stroke();
-
     ctx.beginPath();
     ctx.moveTo(size * 0.1, 0);
     ctx.bezierCurveTo(size * 0.7, -size * 0.4, size * 1.2, -size * 0.1, size * 1.0, size * 0.15);
     ctx.bezierCurveTo(size * 0.8, size * 0.25, size * 0.5, size * 0.15, size * 0.1, 0);
     ctx.fillStyle = 'rgba(180, 180, 180, 0.45)';
     ctx.fill();
-
     ctx.beginPath();
     ctx.ellipse(size * 0.7, -size * 0.35, size * 0.30, size * 0.14, -0.4, 0, TAU);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
     ctx.fill();
     ctx.restore();
   }
-
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.scale(side, 1);
@@ -285,7 +258,6 @@ function drawRibbon(ctx, x, y, size, t) {
     ctx.stroke();
     ctx.restore();
   }
-
   ctx.save();
   ctx.beginPath();
   ctx.ellipse(0, size * 0.08, size * 0.28, size * 0.26, 0, 0, TAU);
@@ -298,13 +270,11 @@ function drawRibbon(ctx, x, y, size, t) {
   ctx.strokeStyle = 'rgba(120, 120, 120, 0.45)';
   ctx.lineWidth = 1;
   ctx.stroke();
-
   ctx.beginPath();
   ctx.ellipse(-size * 0.07, size * 0.02, size * 0.08, size * 0.05, -0.3, 0, TAU);
   ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
   ctx.fill();
   ctx.restore();
-
   ctx.restore();
 }
 
@@ -314,12 +284,7 @@ const COLORES_TULIPAN = [
   ['#fff3bf', '#ffd43b', '#fab005'],
   ['#ffe8a3', '#ffc300', '#d97706'],
 ];
-
-const bg = {
-  top: '#0a1220',
-  mid: '#0d1f38',
-  bot: '#08101c',
-};
+const bg = { top: '#0a1220', mid: '#0d1f38', bot: '#08101c' };
 
 function create(ctx, w, h) {
   const cx = w / 2;
@@ -333,7 +298,6 @@ function create(ctx, w, h) {
     { angle: 0.45,   dist: 0.65, len: 0.85, size: 0.090, leaf: true, side:  1 },
     { angle: 0,      dist: 0.05, len: 0.88, size: 0.088 },
   ];
-
   const paletaPequena = [
     { angle: -0.10,  dist: 0.15, len: 0.78, size: 0.058 },
     { angle: 0.10,   dist: 0.15, len: 0.78, size: 0.058 },
@@ -342,7 +306,6 @@ function create(ctx, w, h) {
     { angle: -0.55,  dist: 0.75, len: 0.62, size: 0.052 },
     { angle: 0.55,   dist: 0.75, len: 0.62, size: 0.052 },
   ];
-
   const paletaMini = [
     { angle: -0.20,  dist: 0.30, len: 0.55, size: 0.036 },
     { angle: 0.20,   dist: 0.30, len: 0.55, size: 0.036 },
@@ -364,7 +327,6 @@ function create(ctx, w, h) {
       priority: 1,
     };
   });
-
   const pequenas = paletaPequena.map((p, i) => ({
     angle: p.angle + rand(-0.02, 0.02),
     dist: p.dist,
@@ -376,7 +338,6 @@ function create(ctx, w, h) {
     leaves: [],
     priority: 2,
   }));
-
   const minis = paletaMini.map((p, i) => ({
     angle: p.angle + rand(-0.02, 0.02),
     dist: p.dist,
@@ -388,7 +349,6 @@ function create(ctx, w, h) {
     leaves: [],
     priority: 3,
   }));
-
   const flores = [...grandes, ...pequenas, ...minis];
 
   const motas = Array.from({ length: 55 }, () => ({
@@ -453,7 +413,6 @@ function create(ctx, w, h) {
     for (const f of orden) {
       const { grow, base, ctrl, tip } = geometry(f, t, groundY);
       if (grow <= 0) continue;
-
       ctx.lineCap = 'round';
       const gradStem = ctx.createLinearGradient(base.x, base.y, tip.x, tip.y);
       gradStem.addColorStop(0, '#1e4d2b');
@@ -478,7 +437,6 @@ function create(ctx, w, h) {
         );
         gradHoja.addColorStop(0, '#2e7d32');
         gradHoja.addColorStop(1, '#66bb6a');
-
         ctx.save();
         ctx.strokeStyle = '#3a8a44';
         ctx.lineWidth = 1.5;
@@ -498,7 +456,6 @@ function create(ctx, w, h) {
       if (bloom <= 0.01) continue;
       const { grow, base, ctrl, tip } = geometry(f, t, groundY);
       if (grow <= 0) continue;
-
       const head = qpoint(base, ctrl, tip, grow);
       const d = qderiv(base, ctrl, tip, grow);
       const angle = Math.atan2(d.y, d.x) + Math.PI / 2;
@@ -524,10 +481,7 @@ function create(ctx, w, h) {
   };
 }
 
-const state = {
-  target: 0,
-  ramoArriba: false,
-};
+const state = { target: 0, ramoArriba: false };
 
 const lienzo = document.querySelector('canvas');
 const pincel = lienzo.getContext('2d');
@@ -543,8 +497,8 @@ function preparar() {
   lienzo.width = Math.round(ancho * escala);
   lienzo.height = Math.round(alto * escala);
   pincel.setTransform(escala, 0, 0, escala, 0, 0);
-  // Cuando ya está arriba: lo subimos bastante para dejar sitio al texto
-  state.target = state.ramoArriba ? alto * 0.35 : alto * 0.82;
+  // 0.52 en lugar de 0.35: sube menos
+  state.target = state.ramoArriba ? alto * 0.52 : alto * 0.82;
   dibujar = create(pincel, ancho, alto);
 }
 
@@ -573,18 +527,15 @@ function revealMessage() {
   btn.style.opacity = '0';
   setTimeout(() => { btn.style.display = 'none'; }, 500);
 
-  // Subimos el ramo hasta arriba para dejar espacio al texto
   state.ramoArriba = true;
-  state.target = alto * 0.35;
+  state.target = alto * 0.52;   // sube a media pantalla, no tanto
 
   document.getElementById('titulo').classList.add('oculto');
   document.getElementById('texto').classList.add('mostrar-texto');
 
   if (!raining) {
     raining = true;
-    for (let i = 0; i < 15; i++) {
-      setTimeout(createPetal, i * 60);
-    }
+    for (let i = 0; i < 15; i++) setTimeout(createPetal, i * 60);
     setInterval(createPetal, 180);
   }
 }
@@ -592,20 +543,14 @@ function revealMessage() {
 function createPetal() {
   const petal = document.createElement('div');
   petal.className = 'floating-petal';
-
   const size = Math.random() * 12 + 10;
   petal.style.width = `${size}px`;
   petal.style.height = `${size * 1.5}px`;
   petal.style.left = Math.random() * window.innerWidth + 'px';
-
   const duration = Math.random() * 3 + 3;
   petal.style.animationDuration = duration + 's';
-
   document.body.appendChild(petal);
-
-  setTimeout(() => {
-    petal.remove();
-  }, duration * 1000);
+  setTimeout(() => petal.remove(), duration * 1000);
 }
 </script>
 
