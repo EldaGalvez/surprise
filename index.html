@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Para ti 🌷</title>
 
 <style>
@@ -11,6 +11,9 @@
     margin: 0;
     overflow: hidden;
     background: #0b1a2a;
+    /* Aprovecha el área segura en iPhones con notch */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    box-sizing: border-box;
   }
 
   canvas {
@@ -22,17 +25,18 @@
     z-index: 1;
   }
 
+  /* ---------- BOTÓN ---------- */
   .btn-regalo {
     position: fixed;
     left: 50%;
-    bottom: 32px;
+    bottom: max(24px, env(safe-area-inset-bottom));
     transform: translateX(-50%);
     z-index: 100;
     display: inline-block;
     background: linear-gradient(135deg, #ffd600, #ffab00);
     border: none;
-    padding: 13px 34px;
-    font-size: 1.05rem;
+    padding: clamp(10px, 2.5vw, 14px) clamp(24px, 6vw, 40px);
+    font-size: clamp(0.95rem, 2.5vw, 1.15rem);
     font-weight: bold;
     color: #263238;
     border-radius: 30px;
@@ -40,6 +44,7 @@
     box-shadow: 0 6px 20px rgba(255, 214, 0, 0.4);
     transition: transform 0.2s, box-shadow 0.2s, opacity 0.5s;
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    white-space: nowrap;
   }
 
   .btn-regalo:hover {
@@ -51,10 +56,11 @@
     transform: translateX(-50%) scale(0.97);
   }
 
+  /* ---------- TÍTULO ---------- */
   .titulo {
     position: fixed;
     left: 50%;
-    top: 4%;
+    top: max(3vh, 16px);
     transform: translateX(-50%);
     z-index: 50;
     opacity: 1;
@@ -64,10 +70,11 @@
     pointer-events: none;
     padding: 0 20px;
     color: #ffe066;
-    font-size: clamp(1.1rem, 4vw, 1.8rem);
+    font-size: clamp(1rem, 3.5vw + 0.5vh, 1.8rem);
     font-weight: 800;
     letter-spacing: 0.05em;
     text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+    max-width: 90vw;
   }
 
   .titulo.oculto {
@@ -75,10 +82,11 @@
     transform: translateX(-50%) translateY(-30px);
   }
 
+  /* ---------- TEXTO ---------- */
   .texto {
     position: fixed;
     left: 50%;
-    bottom: 3%;
+    bottom: max(3vh, 16px);
     z-index: 50;
     opacity: 0;
     transform: translateX(-50%) translateY(30px);
@@ -86,13 +94,13 @@
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     text-align: center;
     pointer-events: none;
-    padding: 0 16px;
+    padding: 0 clamp(12px, 4vw, 24px);
     color: #fff;
-    font-size: clamp(0.85rem, 3.4vw, 1.15rem);
+    /* Tamaño fluido: se adapta al ancho del viewport */
+    font-size: clamp(0.82rem, 2.4vw + 0.3vh, 1.15rem);
     font-weight: 500;
-    max-width: min(520px, 92vw);
+    max-width: min(560px, 92vw);
     line-height: 1.5;
-    /* Sombra FUERTE para que se lea sobre cualquier fondo */
     text-shadow: 0 2px 14px rgba(0,0,0,0.95), 0 0 6px rgba(0,0,0,0.9), 0 1px 2px rgba(0,0,0,1);
   }
 
@@ -101,6 +109,22 @@
     transform: translateX(-50%) translateY(0);
   }
 
+  /* En pantallas horizontales bajas (celular acostado), el texto
+     se hace más pequeño y se pega más al borde inferior. */
+  @media (orientation: landscape) and (max-height: 500px) {
+    .texto {
+      font-size: clamp(0.75rem, 1.8vw, 0.95rem);
+      max-width: 70vw;
+      bottom: max(2vh, 8px);
+      line-height: 1.35;
+    }
+    .titulo {
+      font-size: clamp(0.9rem, 2vw, 1.2rem);
+      top: max(2vh, 8px);
+    }
+  }
+
+  /* ---------- LLUVIA DE PÉTALOS ---------- */
   .floating-petal {
     position: fixed;
     top: -30px;
@@ -135,7 +159,7 @@
 
 <script>
 // ====================================================
-// 1. ANIMACIÓN DEL RAMO (canvas)
+// UTILIDADES
 // ====================================================
 const TAU = Math.PI * 2;
 const clamp = (v, min = 0, max = 1) => Math.min(max, Math.max(min, v));
@@ -160,7 +184,6 @@ function qderiv(p0, p1, p2, s) {
     y: 2 * (1 - s) * (p1.y - p0.y) + 2 * s * (p2.y - p1.y),
   };
 }
-
 function strokePartialCurve(ctx, p0, p1, p2, amount, steps = 24) {
   ctx.beginPath();
   ctx.moveTo(p0.x, p0.y);
@@ -201,7 +224,7 @@ function drawPetal(ctx, s, color) {
   ctx.fill();
 }
 
-function drawTulip(ctx, x, y, size, angle, colors, open) {
+function drawTulip(ctx, x, y, size, angle, colors) {
   const [light, mid] = colors;
   ctx.save();
   ctx.translate(x, y);
@@ -211,10 +234,11 @@ function drawTulip(ctx, x, y, size, angle, colors, open) {
   ctx.restore();
 }
 
-function drawRibbon(ctx, x, y, size, t) {
+function drawRibbon(ctx, x, y, size) {
   ctx.save();
   ctx.translate(x, y);
 
+  // Colas
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.beginPath();
@@ -236,6 +260,7 @@ function drawRibbon(ctx, x, y, size, t) {
     ctx.restore();
   }
 
+  // Bucles grandes
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.scale(side, 1);
@@ -267,6 +292,7 @@ function drawRibbon(ctx, x, y, size, t) {
     ctx.restore();
   }
 
+  // Bucles pequeños
   for (const side of [-1, 1]) {
     ctx.save();
     ctx.scale(side, 1);
@@ -282,6 +308,7 @@ function drawRibbon(ctx, x, y, size, t) {
     ctx.restore();
   }
 
+  // Nudo
   ctx.save();
   ctx.beginPath();
   ctx.ellipse(0, size * 0.08, size * 0.28, size * 0.26, 0, 0, TAU);
@@ -320,15 +347,32 @@ const bg = {
 function create(ctx, w, h) {
   const cx = w / 2;
 
-  // ---------- CLAVE DEL ARREGLO ----------
-  // En lugar de calcular el tamaño del ramo con la altura completa,
-  // lo limitamos a un % de la ALTURA VISIBLE y al ancho disponible.
-  const vertical = h > w;
-  // El ramo debe ocupar como máximo el 55% de la altura en celular,
-  // y como máximo el ancho de la pantalla (con margen).
-  const maxHeight = vertical ? h * 0.55 : h * 0.75;
-  const maxWidth = w * 0.9;
-  const S = Math.min(maxWidth, maxHeight);
+  // ====================================================
+  // CÁLCULO DEL TAMAÑO DEL RAMO (totalmente adaptativo)
+  // ====================================================
+  // Reglas:
+  // 1) El ramo nunca debe ser más ancho que el 85% del ancho visible.
+  // 2) El ramo nunca debe ser más alto que el 60% de la altura (para
+  //    dejar sitio al texto abajo).
+  // 3) En pantallas horizontales, el ramo puede ser más alto porque
+  //    el texto va centrado abajo.
+  const ratio = w / h;
+  let maxRamoW, maxRamoH;
+  if (ratio > 1.2) {
+    // Muy horizontal (laptop, tablet acostada, celular acostado)
+    maxRamoW = w * 0.75;
+    maxRamoH = h * 0.85;
+  } else if (ratio > 0.8) {
+    // Casi cuadrado (tablet en vertical)
+    maxRamoW = w * 0.80;
+    maxRamoH = h * 0.60;
+  } else {
+    // Muy vertical (celular)
+    maxRamoW = w * 0.88;
+    maxRamoH = h * 0.58;
+  }
+
+  const S = Math.min(maxRamoW, maxRamoH);
 
   const paletaGrande = [
     { angle: 0,      dist: 0.00, len: 1.00, size: 0.095 },
@@ -338,7 +382,6 @@ function create(ctx, w, h) {
     { angle: 0.45,   dist: 0.65, len: 0.85, size: 0.090, leaf: true, side:  1 },
     { angle: 0,      dist: 0.05, len: 0.88, size: 0.088 },
   ];
-
   const paletaPequena = [
     { angle: -0.10,  dist: 0.15, len: 0.78, size: 0.058 },
     { angle: 0.10,   dist: 0.15, len: 0.78, size: 0.058 },
@@ -347,7 +390,6 @@ function create(ctx, w, h) {
     { angle: -0.55,  dist: 0.75, len: 0.62, size: 0.052 },
     { angle: 0.55,   dist: 0.75, len: 0.62, size: 0.052 },
   ];
-
   const paletaMini = [
     { angle: -0.20,  dist: 0.30, len: 0.55, size: 0.036 },
     { angle: 0.20,   dist: 0.30, len: 0.55, size: 0.036 },
@@ -369,7 +411,6 @@ function create(ctx, w, h) {
       priority: 1,
     };
   });
-
   const pequenas = paletaPequena.map((p, i) => ({
     angle: p.angle + rand(-0.02, 0.02),
     dist: p.dist,
@@ -381,7 +422,6 @@ function create(ctx, w, h) {
     leaves: [],
     priority: 2,
   }));
-
   const minis = paletaMini.map((p, i) => ({
     angle: p.angle + rand(-0.02, 0.02),
     dist: p.dist,
@@ -420,7 +460,8 @@ function create(ctx, w, h) {
     return { grow, base, ctrl, tip };
   }
 
-  // Punto de unión inicial: abajo, como siempre
+  // Punto de unión inicial: dependiendo del formato
+  const vertical = h > w;
   let groundY = vertical ? h * 0.78 : h * 0.82;
 
   return (t, dt) => {
@@ -508,14 +549,13 @@ function create(ctx, w, h) {
       const head = qpoint(base, ctrl, tip, grow);
       const d = qderiv(base, ctrl, tip, grow);
       const angle = Math.atan2(d.y, d.x) + Math.PI / 2;
-      const open = easeOutCubic(clamp((t - f.delay - 1.6) / 1.5));
-      drawTulip(ctx, head.x, head.y, f.size * bloom, angle, f.colors, open);
+      drawTulip(ctx, head.x, head.y, f.size * bloom, angle, f.colors);
     }
 
     const ribbonAppear = easeOutBack(clamp((t - 0.2) / 1.0));
     if (ribbonAppear > 0.01) {
       const ribbonY = groundY - S * 0.15;
-      drawRibbon(ctx, cx, ribbonY, S * 0.100 * ribbonAppear, t);
+      drawRibbon(ctx, cx, ribbonY, S * 0.100 * ribbonAppear);
     }
 
     const shadow = ctx.createRadialGradient(
@@ -530,6 +570,9 @@ function create(ctx, w, h) {
   };
 }
 
+// ====================================================
+// ESTADO + INICIALIZACIÓN
+// ====================================================
 const state = {
   target: 0,
   ramoArriba: false,
@@ -542,6 +585,22 @@ let dibujar;
 let ancho = 0, alto = 0, escala = 1;
 let tiempo = 0, anterior = performance.now();
 
+// Calcula la Y objetivo según el estado actual (arriba o abajo)
+// y el formato de pantalla (vertical u horizontal).
+function calcularTarget() {
+  const vertical = alto > ancho;
+  const ratio = ancho / alto;
+  if (state.ramoArriba) {
+    // Cuando el ramo sube, se coloca arriba dejando sitio al texto
+    if (ratio > 1.2) return alto * 0.55;      // horizontal ancho: sube poco
+    if (ratio > 0.8) return alto * 0.45;      // tablet vertical: medio
+    return alto * 0.35;                        // celular vertical: arriba
+  } else {
+    // Estado inicial: ramo abajo
+    return vertical ? alto * 0.78 : alto * 0.82;
+  }
+}
+
 function preparar() {
   ancho = innerWidth;
   alto = innerHeight;
@@ -549,17 +608,7 @@ function preparar() {
   lienzo.width = Math.round(ancho * escala);
   lienzo.height = Math.round(alto * escala);
   pincel.setTransform(escala, 0, 0, escala, 0, 0);
-
-  // Estado inicial: ramo abajo, listo para subir
-  const vertical = alto > ancho;
-  if (state.ramoArriba) {
-    // Ya se pulsó: subimos el ramo a un tercio superior de la pantalla
-    state.target = vertical ? alto * 0.35 : alto * 0.65;
-  } else {
-    // Aún no se pulsa: ramo abajo
-    state.target = vertical ? alto * 0.78 : alto * 0.82;
-  }
-
+  state.target = calcularTarget();
   dibujar = create(pincel, ancho, alto);
 }
 
@@ -588,10 +637,8 @@ function revealMessage() {
   btn.style.opacity = '0';
   setTimeout(() => { btn.style.display = 'none'; }, 500);
 
-  const vertical = alto > ancho;
   state.ramoArriba = true;
-  // Al pulsar, el ramo sube mucho más en celular
-  state.target = vertical ? alto * 0.35 : alto * 0.65;
+  state.target = calcularTarget();
 
   document.getElementById('titulo').classList.add('oculto');
   document.getElementById('texto').classList.add('mostrar-texto');
@@ -621,7 +668,7 @@ function createPetal() {
 
   setTimeout(() => {
     petal.remove();
-  }, 1000 * duration);
+  }, duration * 1000);
 }
 </script>
 
